@@ -4,6 +4,7 @@ from numpy.linalg import inv
 from numpy import sin, cos
 import numpy as np
 import matplotlib.pyplot as plt
+import random
 
 M        = 0.5     # [kg]      mass of the cart
 m        = 0.2     # [kg]      mass of the pendulum
@@ -31,18 +32,18 @@ B4   = I_p                      / denom
 B2   = m_l                      / denom
 
 A = np.asarray([
-    [ 0,    0,      0,      1   ],
-    [ 0,    A22,    A23,    A24   ],
     [ 0,    1,      0,      0   ],
-    [ 0,    A42,    A43,    0 ] ])
+    [ A23,  A24,  0,    -A22   ],
+    [ 0,    0,      0,      1   ],
+    [ A43,  0,    0,    A43 ] ])
 
-B = np.asarray([[0], [B2], [0], [B4]])
+B = np.asarray([[0], [-B2], [0], [B4]])
 
 Q = np.asarray([
-    [ 10,   0,  0,  0 ],
-    [ 0,    1,  0,  0 ],
-    [ 0,    0,  0,  0 ],
-    [ 0,    0,  0,  0 ] ])
+    [ 10,   0,  0,   0 ],
+    [ 0,    1,  0,   0 ],
+    [ 0,    0,  0.1, 0 ],
+    [ 0,    0,  0,   0.1 ] ])
 
 
 R = np.asarray([[1]])
@@ -51,6 +52,8 @@ P = solve_continuous_are(A, B, Q, R)
 
 derp = np.dot(1/R, np.transpose(B))
 K = np.dot(derp, P)
+#K[:,2] = 0
+#K[:,3] = 0
 print K
 
 Ac = A - np.dot(B,K)
@@ -60,8 +63,8 @@ print eigs
 
 def control(state):
     ref = np.asarray([np.pi,0,0,0])
-    return -np.dot(K, state-ref)
-
+    # return random.gauss(0,1)
+    return -np.dot(K, ref-state)
 
 def sys(state, t):
     theta       = state[0]
