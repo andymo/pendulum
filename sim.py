@@ -11,7 +11,7 @@ l        = 0.3     # [m]       length from pendulum center to cart
 I        = 0.006   # [kg*m^2]  moment of inertia
 gravity  = 9.81    # [m/(s^2)] acceleration from gravityravity
 friction = 0.1     # [N/m/sec] coefficient of friction of cart
-a        = 0.1     # [N/r/sec] coefficient of friction of pendulum
+a        = 0.01     # [N/r/sec] coefficient of friction of pendulum
 
 m_l    = m*l
 m2_l2  = m_l*m_l  #m2_l2 for readability?
@@ -45,7 +45,7 @@ Q = np.asarray([
     [ 0,    0,  0,  0 ] ])
 
 
-R = np.asarray([[0.1]])
+R = np.asarray([[1]])
 
 P = solve_continuous_are(A, B, Q, R)
 
@@ -54,10 +54,13 @@ print derp
 K = np.dot(derp, P)
 print K
 
+Ac = A - np.dot(B,K)
+print Ac
+eigs, vecs = np.linalg.eig(Ac) 
+print eigs
+
 def control(state):
-    ref = np.asarray([np.pi,0,0,0])
-    print ref
-    print state
+    ref = np.asarray([3.14159,0,0,0])
     return -np.dot(K, state-ref)
 
 
