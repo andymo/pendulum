@@ -140,9 +140,9 @@ class NuPICPlotOutput(NuPICOutput):
       print "initializing %s" % self.names[index]
       # graph = self.graphs[index]
       self.dates.append(deque([timestamps[index]] * WINDOW, maxlen=WINDOW))
-      self.convertedDates.append(deque(
-        [date2num(date) for date in self.dates[index]], maxlen=WINDOW
-      ))
+      #self.convertedDates.append(deque(
+      #  [date2num(date) for date in self.dates[index]], maxlen=WINDOW
+      #))
       self.actualValues.append(deque([0.0] * WINDOW, maxlen=WINDOW))
       self.predictedValues.append(deque([0.0] * WINDOW, maxlen=WINDOW))
 
@@ -170,14 +170,14 @@ class NuPICPlotOutput(NuPICOutput):
 
     for index in range(len(self.names)):
       self.dates[index].append(timestamps[index])
-      self.convertedDates[index].append(date2num(timestamps[index]))
+      #self.convertedDates[index].append(date2num(timestamps[index]))
       self.actualValues[index].append(actualValues[index])
       self.predictedValues[index].append(predictedValues[index])
 
       # Update data
-      self.actualLines[index].set_xdata(self.convertedDates[index])
+      self.actualLines[index].set_xdata(self.dates[index])
       self.actualLines[index].set_ydata(self.actualValues[index])
-      self.predictedLines[index].set_xdata(self.convertedDates[index])
+      self.predictedLines[index].set_xdata(self.dates[index])
       self.predictedLines[index].set_ydata(self.predictedValues[index])
 
       self.graphs[index].relim()

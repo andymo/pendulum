@@ -4,13 +4,24 @@ import numpy
 from math import pi
 from random import *
 
+PERCENT_KICK = 10
+
 def random_walk(n):
     x = [gauss(0,0.01)]
     for step in range(n-1):
         x.append(x[-1] + gauss(0,0.01))
     return x
 
-U = random_walk(1000)
+def random_kick(n):
+   x = []
+   for step in range(n):
+      if randint(1, 100) % PERCENT_KICK == 0:
+         x.append(gauss(0, 0.1))
+      else:
+         x.append(0)
+   return x
+
+U = random_kick(2000)
 X0 = [pi, 0, 0, 0]
 
 OUTFILE_NAME = "pendulum_sim.csv"
