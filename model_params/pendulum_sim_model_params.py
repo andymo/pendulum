@@ -48,7 +48,7 @@ MODEL_PARAMS = {
                     'minval': -10.0,
                     'maxval': 10.0,
                     'n': 409,
-                    'w': 8
+                    'w': 21
                 },
                 'x_dot': {
                     'fieldname': u'x_dot',
@@ -57,7 +57,7 @@ MODEL_PARAMS = {
                     'minval': -10.0,
                     'maxval': 10.0,
                     'n': 409,
-                    'w': 8
+                    'w': 21
                 },
                 'theta': {
                     'fieldname': u'theta',
@@ -66,7 +66,7 @@ MODEL_PARAMS = {
                     'minval': -pi,
                     'maxval': pi,
                     'n': 409,
-                    'w': 8
+                    'w': 21
                 },
                 'theta_dot': {
                     'fieldname': u'theta_dot',
@@ -75,8 +75,8 @@ MODEL_PARAMS = {
                     'minval': -10,
                     'maxval': 10,
                     'n': 409,
-                    'w': 8
-                }
+                    'w': 21
+                },
                 'u': {
                     'fieldname': u'u',
                     'name': u'u',
@@ -84,7 +84,7 @@ MODEL_PARAMS = {
                     'minval': -1000,
                     'maxval': 1000,
                     'n': 409,
-                    'w': 8
+                    'w': 21
                 }
 
             },
