@@ -29,11 +29,13 @@ import csv
 import datetime
 
 from nupic.data.inference_shifter import InferenceShifter
-from nupic.frameworks.opf.metrics import MetricSpec
 from nupic.frameworks.opf.modelfactory import ModelFactory
-from nupic.frameworks.opf.predictionmetricsmanager import MetricsManager
 
 import nupic_output
+
+import numpy as np
+from sim import next_step, control
+from math import pi
 
 
 DESCRIPTION = (
@@ -47,29 +49,20 @@ DESCRIPTION = (
 PENDULUM_NAME = "pendulum_sim"
 DATA_DIR = "."
 MODEL_PARAMS_DIR = "./model_params"
-# '7/2/10 0:00'
-DATE_FORMAT = "%m/%d/%y %H:%M"
+X0 = [0.75*pi, 0, 0, 0]
 
-_METRIC_SPECS = (
-    MetricSpec(field='theta', metric='multiStep',
-               inferenceElement='multiStepBestPredictions',
-               params={'errorMetric': 'aae', 'window': 1000, 'steps': 1}),
-    MetricSpec(field='theta', metric='trivial',
-               inferenceElement='prediction',
-               params={'errorMetric': 'aae', 'window': 1000, 'steps': 1}),
-    MetricSpec(field='theta', metric='multiStep',
-               inferenceElement='multiStepBestPredictions',
-               params={'errorMetric': 'altMAPE', 'window': 1000, 'steps': 1}),
-    MetricSpec(field='theta', metric='trivial',
-               inferenceElement='prediction',
-               params={'errorMetric': 'altMAPE', 'window': 1000, 'steps': 1}),
-)
 
-def createModel(modelParams):
-  model = ModelFactory.create(modelParams)
-  model.enableInference({"predictedField": "theta"})
-  return model
-
+def createModels():
+  models = {}
+  models['theta'] = ModelFactory.create(getModelParamsFromName('theta'))
+  models['theta'].enableInference({"predictedField": "theta"})
+  models['theta_dot'] = ModelFactory.create(getModelParamsFromName('theta_dot'))
+  models['theta_dot'].enableInference({"predictedField": "theta_dot"})
+  models['x'] = ModelFactory.create(getModelParamsFromName('x'))
+  models['x'].enableInference({"predictedField": "x"})
+  models['x_dot'] = ModelFactory.create(getModelParamsFromName('x_dot'))
+  models['x_dot'].enableInference({"predictedField": "x_dot"})
+  return models
 
 
 def getModelParamsFromName(pendulumName):
@@ -85,14 +78,7 @@ def getModelParamsFromName(pendulumName):
   return importedModelParams
 
 
-
-def runIoThroughNupic(inputData, model, pendulumName, plot):
-  inputFile = open(inputData, "rb")
-  csvReader = csv.reader(inputFile)
-  # skip header rows
-  csvReader.next()
-  csvReader.next()
-  csvReader.next()
+def runIoThroughNupic(models, pendulumName, plot):
 
   shifter = InferenceShifter()
   if plot:
@@ -100,46 +86,65 @@ def runIoThroughNupic(inputData, model, pendulumName, plot):
   else:
     output = nupic_output.NuPICFileOutput([pendulumName])
 
-  metricsManager = MetricsManager(_METRIC_SPECS, model.getFieldInfo(),
-                                  model.getInferenceType())
 
+  # Do we need to train with data without control?
+  results = {}
+  u = 0
+  t = 0
+  x = X0
   counter = 0
-  for row in csvReader:
+  while True:
     counter += 1
-    theta = float(row[0])
-    theta_dot = float(row[1])
-    u = float(row[2])
-    result = model.run({
-      "theta": theta,
-      "theta_dot": theta_dot,
+    results['theta'] = models['theta'].run({
+      "theta": x[0],
+      "theta_dot": x[1],
+      "x": x[2],
+      "x_dot": x[3],
       "u": u
     })
-    result.metrics = metricsManager.update(result)
+    results['theta_dot'] = models['theta_dot'].run({
+      "theta": x[0],
+      "theta_dot": x[1],
+      "x": x[2],
+      "x_dot": x[3],
+      "u": u
+    })
+    results['x'] = models['x'].run({
+      "theta": x[0],
+      "theta_dot": x[1],
+      "x": x[2],
+      "x_dot": x[3],
+      "u": u
+    })
+    results['x_dot'] = models['x_dot'].run({
+      "theta": x[0],
+      "theta_dot": x[1],
+      "x": x[2],
+      "x_dot": x[3],
+      "u": u
+    })
 
-    if counter % 100 == 0:
-      print "Read %i lines..." % counter
-      print "After %i records, 1-step altMAPE=%f" % (counter,
-              result.metrics["multiStepBestPredictions:multiStep:"
-                             "errorMetric='altMAPE':steps=1:window=1000:"
-                             "field=theta"])
- 
     if plot:
-      result = shifter.shift(result)
+      results['theta'] = shifter.shift(results['theta']) 
+      results['theta_dot'] = shifter.shift(results['theta_dot']) 
+      results['x'] = shifter.shift(results['x']) 
+      results['x_dot'] = shifter.shift(results['x_dot']) 
 
-    prediction = result.inferences["multiStepBestPredictions"][1]
-    output.write([counter], [theta], [prediction])
+    prediction = results['theta'].inferences["multiStepBestPredictions"][1]
+    output.write([counter], [x[0]], [prediction])
+
+    # retrieve next input values
+    u = control(x)
+    x, t = next_step(x, u, t)
 
   inputFile.close()
   output.close()
 
 
-
 def runModel(pendulumName, plot=False):
   print "Creating model from %s..." % pendulumName
-  model = createModel(getModelParamsFromName(pendulumName))
-  inputData = "%s/%s.csv" % (DATA_DIR, pendulumName.replace(" ", "_"))
-  runIoThroughNupic(inputData, model, pendulumName, plot)
-
+  models = createModels()
+  runIoThroughNupic(models, pendulumName, plot)
 
 
 if __name__ == "__main__":
