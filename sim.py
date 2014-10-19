@@ -26,7 +26,7 @@ def dope_sys(state, t):
     I = 0.006   # [kg*m^2]  moment of inertia
     g = -9.81   # [m/(s^2)] acceleration from gravity
     b = 0.1     # [N/m/sec] coeffisient of friction of cart
-    a = 0.1     # [N/r/sec] coeffisient of friction of pendulum
+    a = 0.01    # [N/r/sec] coeffisient of friction of pendulum
 
 
     theta       = state[0]
@@ -70,7 +70,7 @@ def dope_sys(state, t):
     return np.asarray([theta_dot, theta_ddot, s_dot, s_ddot, 0])
 
 def next_step(x, u, t):
-    dt = 0.1
+    dt = 0.05
     t = np.linspace(t, t+dt, 2)
     # print x.append(u)
     x_next = odeint(dope_sys, np.append(x,u), t)

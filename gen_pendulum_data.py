@@ -4,7 +4,7 @@ import numpy
 from math import pi
 from random import *
 
-PERCENT_KICK = 10
+ANTI_PERCENT_KICK = 20
 
 def random_walk(n):
     x = [gauss(0,0.01)]
@@ -15,8 +15,9 @@ def random_walk(n):
 def random_kick(n):
    x = []
    for step in range(n):
-      if randint(1, 100) % PERCENT_KICK == 0:
-         x.append(gauss(0, 0.1))
+      #if randint(1, 100) % ANTI_PERCENT_KICK == 0:
+      if step % ANTI_PERCENT_KICK == 0:
+         x.append(gauss(0, 25))
       else:
          x.append(0)
    return x
@@ -32,6 +33,7 @@ def main():
    theta_dot = data[1]
 
    #get all of our theta within -pi:pi
+
    i = len(data[0]) - 1
 
    while i > -1:

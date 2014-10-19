@@ -31,14 +31,14 @@ SWARM_DESCRIPTION = {
     {
       "fieldName": "theta_dot",
       "fieldType": "float",
-      "maxValue": 10,
-      "minValue": -10
+      "maxValue": 20,
+      "minValue": -20
     },
     {
       "fieldName": "u",
       "fieldType": "float",
-      "maxValue": 1000,
-      "minValue": -1000
+      "maxValue": 100,
+      "minValue": -100
     }
   ],
   "streamDef": {
