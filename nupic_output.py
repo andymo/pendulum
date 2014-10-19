@@ -129,7 +129,7 @@ class NuPICPlotOutput(NuPICOutput):
     for index in range(len(self.names)):
       self.graphs.append(fig.add_subplot(gs[index, 0]))
       plt.title(self.names[index])
-      plt.ylabel('KW Energy Consumption')
+      plt.ylabel('Theta')
       plt.xlabel('Date')
     plt.tight_layout()
 
