@@ -21,7 +21,7 @@
 # ----------------------------------------------------------------------
 """
 Groups together code used for creating a NuPIC model and dealing with IO.
-(This is a component of the One Hot Gym Prediction Tutorial.)
+(This is derived from component of the One Hot Gym Prediction Tutorial.)
 """
 import importlib
 import sys
@@ -38,55 +38,55 @@ import nupic_output
 
 DESCRIPTION = (
   "Starts a NuPIC model from the model params returned by the swarm\n"
-  "and pushes each line of input from the gym into the model. Results\n"
+  "and pushes each line of input from the pendulum into the model. Results\n"
   "are written to an output file (default) or plotted dynamically if\n"
   "the --plot option is specified.\n"
   "NOTE: You must run ./swarm.py before this, because model parameters\n"
   "are required to run NuPIC.\n"
 )
-GYM_NAME = "rec-center-hourly"
+PENDULUM_NAME = "pendulum_sim"
 DATA_DIR = "."
 MODEL_PARAMS_DIR = "./model_params"
 # '7/2/10 0:00'
 DATE_FORMAT = "%m/%d/%y %H:%M"
 
 _METRIC_SPECS = (
-    MetricSpec(field='kw_energy_consumption', metric='multiStep',
+    MetricSpec(field='theta', metric='multiStep',
                inferenceElement='multiStepBestPredictions',
                params={'errorMetric': 'aae', 'window': 1000, 'steps': 1}),
-    MetricSpec(field='kw_energy_consumption', metric='trivial',
+    MetricSpec(field='theta', metric='trivial',
                inferenceElement='prediction',
                params={'errorMetric': 'aae', 'window': 1000, 'steps': 1}),
-    MetricSpec(field='kw_energy_consumption', metric='multiStep',
+    MetricSpec(field='theta', metric='multiStep',
                inferenceElement='multiStepBestPredictions',
                params={'errorMetric': 'altMAPE', 'window': 1000, 'steps': 1}),
-    MetricSpec(field='kw_energy_consumption', metric='trivial',
+    MetricSpec(field='theta', metric='trivial',
                inferenceElement='prediction',
                params={'errorMetric': 'altMAPE', 'window': 1000, 'steps': 1}),
 )
 
 def createModel(modelParams):
   model = ModelFactory.create(modelParams)
-  model.enableInference({"predictedField": "kw_energy_consumption"})
+  model.enableInference({"predictedField": "theta"})
   return model
 
 
 
-def getModelParamsFromName(gymName):
+def getModelParamsFromName(pendulumName):
   importName = "model_params.%s_model_params" % (
-    gymName.replace(" ", "_").replace("-", "_")
+    pendulumName.replace(" ", "_").replace("-", "_")
   )
   print "Importing model params from %s" % importName
   try:
     importedModelParams = importlib.import_module(importName).MODEL_PARAMS
   except ImportError:
     raise Exception("No model params exist for '%s'. Run swarm first!"
-                    % gymName)
+                    % pendulumName)
   return importedModelParams
 
 
 
-def runIoThroughNupic(inputData, model, gymName, plot):
+def runIoThroughNupic(inputData, model, pendulumName, plot):
   inputFile = open(inputData, "rb")
   csvReader = csv.reader(inputFile)
   # skip header rows
@@ -96,9 +96,9 @@ def runIoThroughNupic(inputData, model, gymName, plot):
 
   shifter = InferenceShifter()
   if plot:
-    output = nupic_output.NuPICPlotOutput([gymName])
+    output = nupic_output.NuPICPlotOutput([pendulumName])
   else:
-    output = nupic_output.NuPICFileOutput([gymName])
+    output = nupic_output.NuPICFileOutput([pendulumName])
 
   metricsManager = MetricsManager(_METRIC_SPECS, model.getFieldInfo(),
                                   model.getInferenceType())
@@ -106,11 +106,17 @@ def runIoThroughNupic(inputData, model, gymName, plot):
   counter = 0
   for row in csvReader:
     counter += 1
-    timestamp = datetime.datetime.strptime(row[0], DATE_FORMAT)
-    consumption = float(row[1])
+    theta = float(row[0])
+    theta_dot = float(row[1])
+    x = float(row[2])
+    x_dot = float(row[3])
+    u = float(row[4])
     result = model.run({
-      "timestamp": timestamp,
-      "kw_energy_consumption": consumption
+      "theta": theta,
+      "theta_dot": theta_dot,
+      "x": x,
+      "x_dot": x_dot,
+      "u": u
     })
     result.metrics = metricsManager.update(result)
 
@@ -119,24 +125,24 @@ def runIoThroughNupic(inputData, model, gymName, plot):
       print ("After %i records, 1-step altMAPE=%f", counter,
               result.metrics["multiStepBestPredictions:multiStep:"
                              "errorMetric='altMAPE':steps=1:window=1000:"
-                             "field=kw_energy_consumption"])
+                             "field=theta"])
  
     if plot:
       result = shifter.shift(result)
 
     prediction = result.inferences["multiStepBestPredictions"][1]
-    output.write([timestamp], [consumption], [prediction])
+    output.write([counter], [theta], [theta_dot], [x], [x_dot], [u], [prediction])
 
   inputFile.close()
   output.close()
 
 
 
-def runModel(gymName, plot=False):
-  print "Creating model from %s..." % gymName
-  model = createModel(getModelParamsFromName(gymName))
-  inputData = "%s/%s.csv" % (DATA_DIR, gymName.replace(" ", "_"))
-  runIoThroughNupic(inputData, model, gymName, plot)
+def runModel(pendulumName, plot=False):
+  print "Creating model from %s..." % pendulumName
+  model = createModel(getModelParamsFromName(pendulumName))
+  inputData = "%s/%s.csv" % (DATA_DIR, pendulumName.replace(" ", "_"))
+  runIoThroughNupic(inputData, model, pendulumName, plot)
 
 
 
@@ -146,4 +152,4 @@ if __name__ == "__main__":
   args = sys.argv[1:]
   if "--plot" in args:
     plot = True
-  runModel(GYM_NAME, plot=plot)
+  runModel(PENDULUM_NAME, plot=plot)
