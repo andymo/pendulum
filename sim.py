@@ -22,7 +22,6 @@ I_p    = I + m_l*l
 
 denom  = ( I * M_m ) + ( M * m_l * l )
 
-
 A42  = -I_p     * friction      / denom
 A43  =  gravity * m2_l2         / denom
 A22  = -m_l     * friction      / denom
@@ -65,7 +64,7 @@ print eigs
 def control(state):
     ref = np.asarray([np.pi,0,0,0])
     # return random.gauss(0,1)
-    return -np.dot(K, ref-state)
+    return -np.dot(K, state-ref)
 
 def sys(state, t):
     theta       = state[0]

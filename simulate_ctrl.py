@@ -3,7 +3,7 @@ from sim import simulate, ctrl_simulate, plot_traj
 from math import pi
 import numpy as np
 
-X0 = [pi, 0, 0, 0]
+X0 = [pi, 0.1, 0, 0]
 
 OUTFILE_NAME = "ctrl_sim.csv"
 
