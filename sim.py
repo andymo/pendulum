@@ -9,7 +9,7 @@ M        = 0.5     # [kg]      mass of the cart
 m        = 0.2     # [kg]      mass of the pendulum
 l        = 0.3     # [m]       length from pendulum center to cart
 I        = 0.006   # [kg*m^2]  moment of inertia
-gravity  = -9.81   # [m/(s^2)] acceleration from gravityravity
+gravity  = 9.81    # [m/(s^2)] acceleration from gravityravity
 friction = 0.1     # [N/m/sec] coefficient of friction of cart
 a        = 0.1     # [N/r/sec] coefficient of friction of pendulum
 
@@ -36,7 +36,7 @@ A = np.asarray([
     [ 0,    0,      0,      1   ],
     [ 0,    A42,    A43,    A44 ] ])
 
-B = np.transpose(np.asarray([[0, B2, 0, B4]]))
+B = np.asarray([[0], [B2], [0], [B4]])
 
 Q = np.asarray([
     [ 10,   0,  0,  0 ],
@@ -49,11 +49,12 @@ R = np.asarray([[0.1]])
 
 P = solve_continuous_are(A, B, Q, R)
 
-K = inv(R) * np.transpose(B) * P
-
+derp = np.dot(1/R, np.transpose(B))
+K = np.dot(derp, P)
+print K
 
 def control(state):
-    return -K * state
+    return -np.dot(K, state)
 
 
 def sys(state, t):
@@ -101,14 +102,12 @@ def next_step(x, u, t):
 def ctrl_simulate(x0, num_times_steps):
     T = np.zeros(num_times_steps) 
     X = np.zeros((len(x0), num_times_steps))
+    U = np.zeros(num_times_steps)
     X[:,0] = x0
     for i in np.asarray(range(num_times_steps-1)):
-        x,t = next_step(X[:,i], control(X[:,i]), T[i])
-        #print x
-        #print t
-        X[:,i+1] = x
-        T[i+1] = t
-    return X, T
+        U[i] = control(X[:,i])
+        X[:,i+1], T[i+1] = next_step(X[:,i], control(X[:,i]), T[i])
+    return X, U, T
 
 def simulate(x0, U):
     T = np.zeros(len(U))

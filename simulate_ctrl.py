@@ -1,13 +1,14 @@
 #!/usr/bin/env python
 from sim import simulate, ctrl_simulate, plot_traj
 from math import pi
+import numpy as np
 
-X0 = [0, 0, 0, 0]
+X0 = [pi, 0, 0, 0]
 
 OUTFILE_NAME = "ctrl_sim.csv"
 
 def main():
-   data, _t = ctrl_simulate(X0, 1000)
+   data, U, _t = ctrl_simulate(X0, 1000)
    theta = data[0]
    theta_dot = data[1]
 
