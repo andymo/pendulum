@@ -52,18 +52,8 @@ P = solve_continuous_are(A, B, Q, R)
 
 derp = np.dot(1/R, np.transpose(B))
 K = np.dot(derp, P)
-#K[:,2] = 0
-#K[:,3] = 0
-print K
-
-Ac = A - np.dot(B,K)
-print Ac
-eigs, vecs = np.linalg.eig(Ac) 
-print eigs
 
 def control(state):
-    print state
-    print K
     if state[0] > 0:
        ref = np.asarray([np.pi,0,0,0])
     else:
@@ -92,7 +82,7 @@ def sys(state, t):
                    - I_p * friction * s_dot )
                   / ( I_p * M_m
                   + m2_l2_cos2_theta ))
-                  + random.gauss(0,1))
+                  + random.uniform(-1,1))
 
 
     theta_ddot  = ((( m_l * cos_theta * u 

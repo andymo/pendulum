@@ -35,10 +35,22 @@ SWARM_DESCRIPTION = {
       "minValue": -20
     },
     {
+      "fieldName": "x",
+      "fieldType": "float",
+      "maxValue": 10,
+      "minValue": -10
+    },
+    {
+      "fieldName": "x_dot",
+      "fieldType": "float",
+      "maxValue": 20,
+      "minValue": -20
+    },
+    {
       "fieldName": "u",
       "fieldType": "float",
-      "maxValue": 100,
-      "minValue": -100
+      "maxValue": 50,
+      "minValue": -50
     }
   ],
   "streamDef": {
@@ -46,8 +58,8 @@ SWARM_DESCRIPTION = {
     "version": 1,
     "streams": [
       {
-        "info": "pendulum_sim",
-        "source": "file://pendulum_sim.csv",
+        "info": "ctrl_sim",
+        "source": "file://ctrl_sim.csv",
         "columns": [
           "*"
         ]
@@ -60,7 +72,7 @@ SWARM_DESCRIPTION = {
     "predictionSteps": [
       1
     ],
-    "predictedField": "theta"
+    "predictedField": "u"
   },
   "iterationCount": -1,
   "swarmSize": "medium"

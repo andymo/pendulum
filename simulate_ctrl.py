@@ -3,12 +3,12 @@ from sim import simulate, ctrl_simulate, plot_traj
 from math import pi
 import numpy as np
 
-X0 = [pi, 0.1, 0, 0]
+X0 = [pi, 0, 0, 0]
 
 OUTFILE_NAME = "ctrl_sim.csv"
 
 def main():
-   data, U, _t = ctrl_simulate(X0, 1000)
+   data, U, _t = ctrl_simulate(X0, 10000)
    theta = data[0]
    theta_dot = data[1]
 
@@ -25,10 +25,10 @@ def main():
 
    #because our version of savetxt doesn't have the header option for some reason
    with open(OUTFILE_NAME, 'w') as f:
-      f.write("theta,theta_dot,u\n")
-      f.write("float,float,float\n")
-      f.write(",,\n")
-      trimmed_data = data[:2]
+      f.write("theta,theta_dot,x,x_dot,u\n")
+      f.write("float,float,float,float,float\n")
+      f.write(",,,,\n")
+      trimmed_data = data[:]
       trimmed_data = np.vstack([trimmed_data, U])
       np.savetxt(f, np.transpose(trimmed_data), delimiter=',', fmt="%.18f")
 

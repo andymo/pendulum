@@ -54,7 +54,7 @@ MODEL_PARAMS_DIR = "./model_params"
 # 1: angular velocity (rad/s)
 # 2: cart position (m)
 # 3: cart velocity (m/s)
-X0 = [0, 0, 0, 0]
+X0 = [pi, 0, 0, 0]
 
 
 def createModel():
@@ -105,10 +105,14 @@ def runIoThroughNupic(model, pendulumName, plot):
       results = shifter.shift(results) 
 
     prediction = results.inferences["multiStepBestPredictions"][1]
-    output.write([counter], [u], [prediction])
+    if counter > 4000:
+       output.write([counter], [x[0]], [x[0]])
 
     # retrieve next input values
-    u = control(x)
+    if counter > 4500:
+       u = prediction
+    else:
+       u = control(x)[0]
     x, t = next_step(x, u, t)
 
   inputFile.close()
