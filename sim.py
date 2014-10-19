@@ -62,7 +62,12 @@ eigs, vecs = np.linalg.eig(Ac)
 print eigs
 
 def control(state):
-    ref = np.asarray([np.pi,0,0,0])
+    print state
+    print K
+    if state[0] > 0:
+       ref = np.asarray([np.pi,0,0,0])
+    else:
+       ref = np.asarray([-np.pi,0,0,0])
     # return random.gauss(0,1)
     return -np.dot(K, state-ref)
 
@@ -81,12 +86,13 @@ def sys(state, t):
     m2_l2_cos2_theta = m2_l2*cos2_theta
 
 
-    s_ddot      = (( I_p * u 
+    s_ddot      = ((( I_p * u 
                    + I_p * m_l * theta_dot2 * sin_theta
                    + gravity * m2_l2 * cossin_theta
                    - I_p * friction * s_dot )
                   / ( I_p * M_m
                   + m2_l2_cos2_theta ))
+                  + random.gauss(0,1))
 
 
     theta_ddot  = ((( m_l * cos_theta * u 
