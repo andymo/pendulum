@@ -1,68 +1,90 @@
 from scipy.integrate import odeint
+from scipy.linalg import solve_continuous_are
+from numpy.linalg import inv
 from numpy import sin, cos
 import numpy as np
 import matplotlib.pyplot as plt
 
-def sys(x, t):
-    M = 0.5     # [kg] mass of the cart
-    m = 0.2     # [kg] mass of the pendulum
-    l = 0.3     # [m] length from pendulum center to cart
-    g = -9.81
+M        = 0.5     # [kg]      mass of the cart
+m        = 0.2     # [kg]      mass of the pendulum
+l        = 0.3     # [m]       length from pendulum center to cart
+I        = 0.006   # [kg*m^2]  moment of inertia
+gravity  = -9.81   # [m/(s^2)] acceleration from gravityravity
+friction = 0.1     # [N/m/sec] coefficient of friction of cart
+a        = 0.1     # [N/r/sec] coefficient of friction of pendulum
 
-    u = x[4]
+m_l    = m*l
+m2_l2  = m_l*m_l  #m2_l2 for readability?
+m3_l3  = m2_l2*m_l
+M_m    = M + m
+I_p    = I + m_l*l
 
-    x_0_dot = x[1]
-    x_1_dot = (( u*cos(x[0]) - (M+m)*g*sin(x[0]) + m*l*(cos(x[0])*sin(x[0]))*pow(x[1],2) ) /
-                ( m*l*pow(cos(x[0]),2) - (M+m)*l ))
-    x_2_dot = x[3]
-    x_3_dot = (( u + m*l*sin(x[0])*pow(x[1],2) - m*g*cos(x[0])*sin(x[0]) ) /
-                ( M + m - m*pow(cos(x[0]),2) ))
-    return np.asarray([x_0_dot, x_1_dot, x_2_dot, x_3_dot, 0])
+denom  = ( I * M_m ) + ( M * m_l * l )
 
-def dope_sys(state, t):
-    M = 0.5     # [kg]      mass of the cart
-    m = 0.2     # [kg]      mass of the pendulum
-    l = 0.3     # [m]       length from pendulum center to cart
-    I = 0.006   # [kg*m^2]  moment of inertia
-    g = -9.81   # [m/(s^2)] acceleration from gravity
-    b = 0.1     # [N/m/sec] coeffisient of friction of cart
-    a = 0.01    # [N/r/sec] coeffisient of friction of pendulum
+A22  = -I_p     * friction      / denom
+A23  =  gravity * m2_l2         / denom
+A42  = -m_l     * friction      / denom
+A43  =  m_l     * gravity * M_m / denom
+A44  =  a                       / denom
+
+B2   = I_p                      / denom
+B4   = m_l                      / denom
+
+A = np.asarray([
+    [ 0,    1,      0,      0   ],
+    [ 0,    A22,    A23,    0   ],
+    [ 0,    0,      0,      1   ],
+    [ 0,    A42,    A43,    A44 ] ])
+
+B = np.transpose(np.asarray([[0, B2, 0, B4]]))
+
+Q = np.asarray([
+    [ 10,   0,  0,  0 ],
+    [ 0,    1,  0,  0 ],
+    [ 0,    0,  0,  0 ],
+    [ 0,    0,  0,  0 ] ])
 
 
+R = np.asarray([[0.1]])
+
+P = solve_continuous_are(A, B, Q, R)
+
+K = inv(R) * np.transpose(B) * P
+
+
+def control(state):
+    return -K * state
+
+
+def sys(state, t):
     theta       = state[0]
     theta_dot   = state[1]
     s_dot       = state[3]
     u           = state[4]
 
-
-    m_l             = m*l
-    m_l2            = m_l*m_l  #m2_l2 for readability?
-    m_l3            = m_l2*m_l
-    M_m             = M + m
-    cos_theta       = cos(theta)
-    sin_theta       = sin(theta)
-    cos2_theta      = cos_theta*cos_theta
-    sin2_theta      = sin_theta*sin_theta
-    cossin_theta    = sin_theta*cos_theta
-    I_p             = I + m_l*l
-    theta_dot2      = theta_dot*theta_dot
-    m_l2_cos_theta2 = m_l2*cos2_theta  # name should be cos2_theta
+    cos_theta        = cos(theta)
+    sin_theta        = sin(theta)
+    cos2_theta       = cos_theta*cos_theta
+    sin2_theta       = sin_theta*sin_theta
+    cossin_theta     = sin_theta*cos_theta
+    theta_dot2       = theta_dot*theta_dot
+    m2_l2_cos2_theta = m2_l2*cos2_theta
 
 
     s_ddot      = (( I_p * u 
                    + I_p * m_l * theta_dot2 * sin_theta
-                   + g * m_l2 * cossin_theta
-                   - I_p * b * s_dot )
+                   + gravity * m2_l2 * cossin_theta
+                   - I_p * friction * s_dot )
                   / ( I_p * M_m
-                  + m_l2_cos_theta2 ))
+                  + m2_l2_cos2_theta ))
 
 
     theta_ddot  = ((( m_l * cos_theta * u 
-                    + m_l2 * cossin_theta * theta_dot2
-                    - m_l * cos_theta * b * s_dot 
-                    + ( g * m_l3 * cossin_theta * cos_theta / I_p ))
-                  / ( I_p * M_m + m_l2_cos_theta2 ))
-                - ( ( m_l * g * sin_theta + a * theta_dot ) 
+                    + m2_l2 * cossin_theta * theta_dot2
+                    - m_l * cos_theta * friction * s_dot 
+                    + ( gravity * m3_l3 * cossin_theta * cos_theta / I_p ))
+                  / ( I_p * M_m + m2_l2_cos2_theta ))
+                - ( ( m_l * gravity * sin_theta + a * theta_dot ) 
                   / I_p ))
 
 
@@ -73,8 +95,20 @@ def next_step(x, u, t):
     dt = 0.05
     t = np.linspace(t, t+dt, 2)
     # print x.append(u)
-    x_next = odeint(dope_sys, np.append(x,u), t)
+    x_next = odeint(sys, np.append(x,u), t)
     return x_next[1,0:4], t[1]
+
+def ctrl_simulate(x0, num_times_steps):
+    T = np.zeros(num_times_steps) 
+    X = np.zeros((len(x0), num_times_steps))
+    X[:,0] = x0
+    for i in np.asarray(range(num_times_steps-1)):
+        x,t = next_step(X[:,i], control(X[:,i]), T[i])
+        #print x
+        #print t
+        X[:,i+1] = x
+        T[i+1] = t
+    return X, T
 
 def simulate(x0, U):
     T = np.zeros(len(U))
