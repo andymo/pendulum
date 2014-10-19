@@ -19,9 +19,6 @@ def main():
    data, _t = simulate(X0,U)
    theta = data[0]
    theta_dot = data[1]
-   x = data[2]
-   x_dot = data[3]
-   data = numpy.vstack([data, U])
 
    #get all of our theta within -pi:pi
    i = len(data[0]) - 1
@@ -36,10 +33,12 @@ def main():
 
    #because our version of savetxt doesn't have the header option for some reason
    with open(OUTFILE_NAME, 'w') as f:
-      f.write("theta,theta_dot,x,x_dot,u\n")
-      f.write("float,float,float,float,float\n")
-      f.write(",,,,\n")
-      numpy.savetxt(f, numpy.transpose(data), delimiter=',', fmt="%.18f")
+      f.write("theta,theta_dot,u\n")
+      f.write("float,float,float\n")
+      f.write(",,\n")
+      trimmed_data = data[:2]
+      trimmed_data = numpy.vstack([trimmed_data, U])
+      numpy.savetxt(f, numpy.transpose(trimmed_data), delimiter=',', fmt="%.18f")
 
    plot_traj(data, U, _t)
 

@@ -41,24 +41,6 @@ MODEL_PARAMS = {
             #
             # (value generated from DS_ENCODER_SCHEMA)
             'encoders': {
-                'x': {
-                    'fieldname': u'x',
-                    'name': u'x',
-                    'type': 'AdaptiveScalarEncoder',
-                    'minval': -10.0,
-                    'maxval': 10.0,
-                    'n': 409,
-                    'w': 21
-                },
-                'x_dot': {
-                    'fieldname': u'x_dot',
-                    'name': u'x_dot',
-                    'type': 'AdaptiveScalarEncoder',
-                    'minval': -10.0,
-                    'maxval': 10.0,
-                    'n': 409,
-                    'w': 21
-                },
                 'theta': {
                     'fieldname': u'theta',
                     'name': u'theta',

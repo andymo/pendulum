@@ -108,14 +108,10 @@ def runIoThroughNupic(inputData, model, pendulumName, plot):
     counter += 1
     theta = float(row[0])
     theta_dot = float(row[1])
-    x = float(row[2])
-    x_dot = float(row[3])
-    u = float(row[4])
+    u = float(row[2])
     result = model.run({
       "theta": theta,
       "theta_dot": theta_dot,
-      "x": x,
-      "x_dot": x_dot,
       "u": u
     })
     result.metrics = metricsManager.update(result)
