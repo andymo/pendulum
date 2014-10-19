@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from sim import simulate
+from sim import simulate, plot_traj
 import numpy
 from math import pi
 from random import *
@@ -11,7 +11,7 @@ def random_walk(n):
     return x
 
 U = random_walk(1000)
-X0 = [.75*pi, 0, 0, 0]
+X0 = [pi, 0, 0, 0]
 
 OUTFILE_NAME = "pendulum_sim.csv"
 
@@ -27,7 +27,7 @@ def main():
    i = len(data[0]) - 1
 
    while i > -1:
-      while not -pi < data[0][i] < pi:
+      while not -pi <= data[0][i] <= pi:
          if data[0][i] < -pi:
             data[0][i] = data[0][i] + 2*pi
          else:
@@ -40,6 +40,9 @@ def main():
       f.write("float,float,float,float,float\n")
       f.write(",,,,\n")
       numpy.savetxt(f, numpy.transpose(data), delimiter=',', fmt="%.18f")
+
+   plot_traj(data, U, _t)
+
    
 
 if __name__ == "__main__":
