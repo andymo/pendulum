@@ -57,17 +57,10 @@ MODEL_PARAMS_DIR = "./model_params"
 X0 = [0, 0, 0, 0]
 
 
-def createModels():
-  models = {}
-  models['theta'] = ModelFactory.create(getModelParamsFromName('theta'))
-  models['theta'].enableInference({"predictedField": "theta"})
-  models['theta_dot'] = ModelFactory.create(getModelParamsFromName('theta_dot'))
-  models['theta_dot'].enableInference({"predictedField": "theta_dot"})
-  models['x'] = ModelFactory.create(getModelParamsFromName('x'))
-  models['x'].enableInference({"predictedField": "x"})
-  models['x_dot'] = ModelFactory.create(getModelParamsFromName('x_dot'))
-  models['x_dot'].enableInference({"predictedField": "x_dot"})
-  return models
+def createModel():
+  model = ModelFactory.create(getModelParamsFromName('u'))
+  model.enableInference({"predictedField": "u"})
+  return model
 
 
 def getModelParamsFromName(pendulumName):
@@ -83,7 +76,7 @@ def getModelParamsFromName(pendulumName):
   return importedModelParams
 
 
-def runIoThroughNupic(models, pendulumName, plot):
+def runIoThroughNupic(model, pendulumName, plot):
 
   shifter = InferenceShifter()
   if plot:
@@ -93,50 +86,26 @@ def runIoThroughNupic(models, pendulumName, plot):
 
 
   # Do we need to train with data without control?
-  results = {}
   u = 0
   t = 0
   x = X0
   counter = 0
   while True:
     counter += 1
-    results['theta'] = models['theta'].run({
+    results = model.run({
       "theta": x[0],
       "theta_dot": x[1],
       "x": x[2],
       "x_dot": x[3],
       "u": u
     })
-    results['theta_dot'] = models['theta_dot'].run({
-      "theta": x[0],
-      "theta_dot": x[1],
-      "x": x[2],
-      "x_dot": x[3],
-      "u": u
-    })
-    results['x'] = models['x'].run({
-      "theta": x[0],
-      "theta_dot": x[1],
-      "x": x[2],
-      "x_dot": x[3],
-      "u": u
-    })
-    results['x_dot'] = models['x_dot'].run({
-      "theta": x[0],
-      "theta_dot": x[1],
-      "x": x[2],
-      "x_dot": x[3],
-      "u": u
-    })
+
 
     if plot:
-      results['theta'] = shifter.shift(results['theta']) 
-      #results['theta_dot'] = shifter.shift(results['theta_dot']) 
-      #results['x'] = shifter.shift(results['x']) 
-      #results['x_dot'] = shifter.shift(results['x_dot']) 
+      results = shifter.shift(results) 
 
-    prediction = results['theta'].inferences["multiStepBestPredictions"][1]
-    output.write([counter], [x[0]], [prediction])
+    prediction = results.inferences["multiStepBestPredictions"][1]
+    output.write([counter], [u], [prediction])
 
     # retrieve next input values
     u = control(x)
@@ -148,8 +117,8 @@ def runIoThroughNupic(models, pendulumName, plot):
 
 def runModel(pendulumName, plot=False):
   print "Creating model from %s..." % pendulumName
-  models = createModels()
-  runIoThroughNupic(models, pendulumName, plot)
+  model = createModel()
+  runIoThroughNupic(model, pendulumName, plot)
 
 
 if __name__ == "__main__":
