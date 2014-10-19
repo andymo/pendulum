@@ -29,7 +29,7 @@ import pprint
 from nupic.swarming import permutations_runner
 from swarm_description import SWARM_DESCRIPTION
 
-INPUT_FILE = "rec-center-hourly.csv"
+INPUT_FILE = "pendulum_sim.csv"
 DESCRIPTION = (
   "This script runs a swarm on the input data (rec-center-hourly.csv) and\n"
   "creates a model parameters file in the `model_params` directory containing\n"
