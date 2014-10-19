@@ -18,27 +18,48 @@
 #
 # http://numenta.org/licenses/
 # ----------------------------------------------------------------------
+from math import pi
 
 SWARM_DESCRIPTION = {
   "includedFields": [
     {
-      "fieldName": "timestamp",
-      "fieldType": "datetime"
+      "fieldName": "x",
+      "fieldType": "float",
+      "maxValue": 10,
+      "minValue": -10
     },
     {
-      "fieldName": "kw_energy_consumption",
+      "fieldName": "x_dot",
       "fieldType": "float",
-      "maxValue": 53.0,
-      "minValue": 0.0
+      "maxValue": 10,
+      "minValue": -10
+    },
+    {
+      "fieldName": "theta",
+      "fieldType": "float",
+      "maxValue": pi,
+      "minValue": -pi
+    },
+    {
+      "fieldName": "theta_dot",
+      "fieldType": "float",
+      "maxValue": 10,
+      "minValue": -10
+    },
+    {
+      "fieldName": "u",
+      "fieldType": "float",
+      "maxValue": 1000,
+      "minValue": -1000
     }
   ],
   "streamDef": {
-    "info": "kw_energy_consumption",
+    "info": "pendulum",
     "version": 1,
     "streams": [
       {
-        "info": "Rec Center",
-        "source": "file://rec-center-hourly.csv",
+        "info": "pendulum_sim",
+        "source": "file://pendulum_sim.csv",
         "columns": [
           "*"
         ]
@@ -51,7 +72,7 @@ SWARM_DESCRIPTION = {
     "predictionSteps": [
       1
     ],
-    "predictedField": "kw_energy_consumption"
+    "predictedField": "theta"
   },
   "iterationCount": -1,
   "swarmSize": "medium"
