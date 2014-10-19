@@ -131,7 +131,7 @@ def runIoThroughNupic(inputData, model, pendulumName, plot):
       result = shifter.shift(result)
 
     prediction = result.inferences["multiStepBestPredictions"][1]
-    output.write([counter], [theta], [theta_dot], [x], [x_dot], [u], [prediction])
+    output.write([counter], [theta], [prediction])
 
   inputFile.close()
   output.close()
