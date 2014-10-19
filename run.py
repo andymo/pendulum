@@ -49,7 +49,7 @@ DESCRIPTION = (
 PENDULUM_NAME = "pendulum_sim"
 DATA_DIR = "."
 MODEL_PARAMS_DIR = "./model_params"
-X0 = [0.75*pi, 0, 0, 0]
+X0 = [0.75*pi, 1, 0, 0]
 
 
 def createModels():
@@ -126,9 +126,9 @@ def runIoThroughNupic(models, pendulumName, plot):
 
     if plot:
       results['theta'] = shifter.shift(results['theta']) 
-      results['theta_dot'] = shifter.shift(results['theta_dot']) 
-      results['x'] = shifter.shift(results['x']) 
-      results['x_dot'] = shifter.shift(results['x_dot']) 
+      #results['theta_dot'] = shifter.shift(results['theta_dot']) 
+      #results['x'] = shifter.shift(results['x']) 
+      #results['x_dot'] = shifter.shift(results['x_dot']) 
 
     prediction = results['theta'].inferences["multiStepBestPredictions"][1]
     output.write([counter], [x[0]], [prediction])
