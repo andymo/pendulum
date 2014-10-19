@@ -50,11 +50,15 @@ R = np.asarray([[0.1]])
 P = solve_continuous_are(A, B, Q, R)
 
 derp = np.dot(1/R, np.transpose(B))
+print derp
 K = np.dot(derp, P)
 print K
 
 def control(state):
-    return -np.dot(K, state)
+    ref = np.asarray([np.pi,0,0,0])
+    print ref
+    print state
+    return -np.dot(K, state-ref)
 
 
 def sys(state, t):
