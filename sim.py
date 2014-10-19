@@ -21,20 +21,21 @@ I_p    = I + m_l*l
 
 denom  = ( I * M_m ) + ( M * m_l * l )
 
-A22  = -I_p     * friction      / denom
-A23  =  gravity * m2_l2         / denom
-A42  = -m_l     * friction      / denom
-A43  =  m_l     * gravity * M_m / denom
-A44  =  a                       / denom
 
-B2   = I_p                      / denom
-B4   = m_l                      / denom
+A42  = -I_p     * friction      / denom
+A43  =  gravity * m2_l2         / denom
+A22  = -m_l     * friction      / denom
+A23  =  m_l     * gravity * M_m / denom
+A24  =  -a                      / denom
+
+B4   = I_p                      / denom
+B2   = m_l                      / denom
 
 A = np.asarray([
-    [ 0,    1,      0,      0   ],
-    [ 0,    A22,    A23,    0   ],
     [ 0,    0,      0,      1   ],
-    [ 0,    A42,    A43,    A44 ] ])
+    [ 0,    A22,    A23,    A24   ],
+    [ 0,    1,      0,      0   ],
+    [ 0,    A42,    A43,    0 ] ])
 
 B = np.asarray([[0], [B2], [0], [B4]])
 
@@ -50,7 +51,6 @@ R = np.asarray([[1]])
 P = solve_continuous_are(A, B, Q, R)
 
 derp = np.dot(1/R, np.transpose(B))
-print derp
 K = np.dot(derp, P)
 print K
 
@@ -60,7 +60,7 @@ eigs, vecs = np.linalg.eig(Ac)
 print eigs
 
 def control(state):
-    ref = np.asarray([3.14159,0,0,0])
+    ref = np.asarray([np.pi,0,0,0])
     return -np.dot(K, state-ref)
 
 
