@@ -49,7 +49,12 @@ DESCRIPTION = (
 PENDULUM_NAME = "pendulum_sim"
 DATA_DIR = "."
 MODEL_PARAMS_DIR = "./model_params"
-X0 = [0.75*pi, 1, 0, 0]
+# X0 - initial pendulum parameters
+# 0: theta (rad)
+# 1: angular velocity (rad/s)
+# 2: cart position (m)
+# 3: cart velocity (m/s)
+X0 = [0, 0, 0, 0]
 
 
 def createModels():
