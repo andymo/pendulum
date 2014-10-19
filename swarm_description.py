@@ -23,18 +23,6 @@ from math import pi
 SWARM_DESCRIPTION = {
   "includedFields": [
     {
-      "fieldName": "x",
-      "fieldType": "float",
-      "maxValue": 10,
-      "minValue": -10
-    },
-    {
-      "fieldName": "x_dot",
-      "fieldType": "float",
-      "maxValue": 10,
-      "minValue": -10
-    },
-    {
       "fieldName": "theta",
       "fieldType": "float",
       "maxValue": pi,
